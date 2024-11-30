@@ -4,12 +4,14 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include <SFML/Audio.hpp>
-#include <iostream>
+#include "muzzleflash.h"
 #include "player.h"
+#include <iostream>
 #include <chrono>
 #include <thread>
-#include "muzzleflash.h"
-
+#include <random>
+#include "button.h"
+#include "TextRenderer.h"
 
 #define FRAME_DURATION 0.00833333333333f
 
@@ -17,19 +19,20 @@ sf::SoundBuffer shootBuffer;
 sf::Sound shootSound;
 
 
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+	glViewport(0, 0, width, height);
+}
+
 int main() {
 	if (!glfwInit()) {
 		std::cerr << "Failed to initialize GLFW!" << std::endl;
 		return -1;
 	}
-
 	if (!shootBuffer.loadFromFile("Resources/shoot.mp3")) {
 		std::cerr << "Failed to load shoot sound!" << std::endl;
 		return -1;
 	}
-
-	shootSound.setBuffer(shootBuffer);
-	shootSound.setVolume(50.f);
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -43,24 +46,34 @@ int main() {
 	}
 
 	glfwMakeContextCurrent(window);
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	if (glewInit() != GLEW_OK) {
 		std::cerr << "Failed to initialize GLEW!" << std::endl;
 		return -1;
 	}
 
-	// Create background instance with your western background image
-	Background background("Resources/wildwestbackground.jpg");
+	TextRenderer textRenderer("Resources/Roboto-Medium.ttf", "text.vert", "text.frag", 50);
 
+
+	Background initialbackground("Resources/initial_background.jpg");
+	Button spButton("Resources/singleplayer.png", -0.5f, 0.25f, 1.f, 0.2f);
+	Button mpButton("Resources/multiplayer.png", -0.5f, -0.25f, 1.f, 0.2f);
+
+
+	shootSound.setBuffer(shootBuffer);
+	shootSound.setVolume(50.f);
+
+	Background background("Resources/wildwestbackground.jpg");
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	GLfloat player1Vertices[] = {
-		-1.f, -0.1f, 0.0f, 0.0f, 0.0f,  // Top-left
-		-1.f, -1.f, 0.0f, 0.0f, 1.0f,  // Bottom-left
-		-0.1f, -1.f, 0.0f, 1.0f, 1.0f,  // Bottom-right
-		-0.1f, -0.1f, 0.0f, 1.0f, 0.0f   // Top-right
+		-1.f, -0.1f, 0.0f, 0.0f, 0.0f,
+		-1.f, -1.f, 0.0f, 0.0f, 1.0f,
+		-0.1f, -1.f, 0.0f, 1.0f, 1.0f,
+		-0.1f, -0.1f, 0.0f, 1.0f, 0.0f
 	};
 	Player player1("Resources/player1_idle.png",
 		"Resources/player1_ready.png",
@@ -112,16 +125,18 @@ int main() {
 	bool player2MuzzleVisible = false;
 	auto player2MuzzleTime = std::chrono::steady_clock::time_point::min();
 
-	const std::chrono::milliseconds MUZZLE_FLASH_DURATION(150);
-	bool inputDisabled = false;
+	
+	
+	
+	bool inputDisabled = true;
 
+	bool entryScreenActive = true;
+
+	const std::chrono::milliseconds MUZZLE_FLASH_DURATION(150);
 	while (!glfwWindowShouldClose(window)) {
 		auto frameStart = std::chrono::high_resolution_clock::now();
-
 		glClear(GL_COLOR_BUFFER_BIT);
 		glfwPollEvents();
-
-		background.render();
 
 		if (std::chrono::steady_clock::now() < player1MuzzleTime + MUZZLE_FLASH_DURATION) {
 			player1Muzzle.setShow(true);
@@ -135,6 +150,28 @@ int main() {
 		}
 		else {
 			player2Muzzle.setShow(false);
+		}
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+
+		int width, height;
+		glfwGetFramebufferSize(window, &width, &height);
+		float x = (2.0f * xpos) / width - 1.0f;
+		float y = 1.0f - (2.0f * ypos) / height;
+
+		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && entryScreenActive) {
+			// Check if Start button was clicked
+			if (spButton.isClicked(x, y)) {
+				std::cout << "Start Button Clicked!" << std::endl;
+				entryScreenActive = false;
+				inputDisabled = false;
+			}
+			// Check if Quit button was clicked
+			else if (mpButton.isClicked(x, y)) {
+				std::cout << "Quit Button Clicked!" << std::endl;
+				entryScreenActive = false;
+				inputDisabled = false;
+			}
 		}
 
 		if (!inputDisabled) {
@@ -191,11 +228,26 @@ int main() {
 			player1DeathPending = false;
 			inputDisabled = false;
 		}
+		if (entryScreenActive) {
+			initialbackground.render();
+			spButton.render();
+			mpButton.render();
+		}
+		else {
+			background.render();
+			player1.render();
+			player1Muzzle.render();
+			player2.render();
+			player2Muzzle.render();
+			int player1Score = player1.getPoints(); // Assuming getPoints() gives the score of player 1
+			int player2Score = player2.getPoints(); // Assuming getPoints() gives the score of player 2
 
-		player1.render();
-		player1Muzzle.render();
-		player2.render();
-		player2Muzzle.render();
+			glm::vec3 scoreColor(1.0f, 1.0f, 1.0f); // White color, adjust as needed
+
+			textRenderer.RenderText(std::to_string(player1Score), 10.0f, 760.0f, 1.0f, scoreColor);
+
+			textRenderer.RenderText(std::to_string(player2Score), 700.0f, 760.0f, 1.0f, scoreColor);
+		}
 
 		glfwSwapBuffers(window);
 		auto frameEnd = std::chrono::high_resolution_clock::now();

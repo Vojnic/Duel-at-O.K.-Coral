@@ -150,17 +150,23 @@ sfml-system.lib
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="background.cpp" />
+    <ClCompile Include="button.cpp" />
+    <ClCompile Include="button.h" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MuzzleFlash.cpp" />
     <ClCompile Include="muzzleflash.h" />
     <ClCompile Include="player.cpp" />
+    <ClCompile Include="TextRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="basic.frag" />
     <None Include="basic.vert" />
     <None Include="packages.config" />
+    <None Include="text.frag" />
+    <None Include="text.vert" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Resources\multiplayer.png" />
     <Image Include="Resources\muzzleflash.png" />
     <Image Include="Resources\player1_dead.png" />
     <Image Include="Resources\player1_idle.png" />
@@ -168,15 +174,20 @@ sfml-system.lib
     <Image Include="Resources\player2_dead.png" />
     <Image Include="Resources\player2_idle.png" />
     <Image Include="Resources\player2_ready.png" />
+    <Image Include="Resources\singleplayer.png" />
     <Image Include="Resources\wildwestbackground.jpg" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="background.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="TextRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <Media Include="Resources\shoot.mp3" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="Resources\Roboto-Medium.ttf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
@@ -184,6 +195,7 @@ sfml-system.lib
     <Import Project="packages\glew-2.2.0.2.2.0.1\build\native\glew-2.2.0.targets" Condition="Exists('packages\glew-2.2.0.2.2.0.1\build\native\glew-2.2.0.targets')" />
     <Import Project="packages\glm.0.9.9.800\build\native\glm.targets" Condition="Exists('packages\glm.0.9.9.800\build\native\glm.targets')" />
     <Import Project="packages\sdl2.nuget.redist.2.30.9\build\native\sdl2.nuget.redist.targets" Condition="Exists('packages\sdl2.nuget.redist.2.30.9\build\native\sdl2.nuget.redist.targets')" />
+    <Import Project="packages\freetype2.2.6.0.1\build\native\freetype2.targets" Condition="Exists('packages\freetype2.2.6.0.1\build\native\freetype2.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -193,5 +205,6 @@ sfml-system.lib
     <Error Condition="!Exists('packages\glew-2.2.0.2.2.0.1\build\native\glew-2.2.0.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\glew-2.2.0.2.2.0.1\build\native\glew-2.2.0.targets'))" />
     <Error Condition="!Exists('packages\glm.0.9.9.800\build\native\glm.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\glm.0.9.9.800\build\native\glm.targets'))" />
     <Error Condition="!Exists('packages\sdl2.nuget.redist.2.30.9\build\native\sdl2.nuget.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\sdl2.nuget.redist.2.30.9\build\native\sdl2.nuget.redist.targets'))" />
+    <Error Condition="!Exists('packages\freetype2.2.6.0.1\build\native\freetype2.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\freetype2.2.6.0.1\build\native\freetype2.targets'))" />
   </Target>
 </Project>
