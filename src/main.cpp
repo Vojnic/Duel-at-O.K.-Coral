@@ -8,8 +8,10 @@
 #include <chrono>
 #include <thread>
 
-#define FRAME_DURATION 0.01666666666f
+
+#define FRAME_DURATION 0.00833333333333f
 int main() {
+
 	if (!glfwInit()) {
 		std::cerr << "Failed to initialize GLFW!" << std::endl;
 		return -1;
@@ -61,40 +63,81 @@ int main() {
 		"Resources/player2_ready.png",
 		"Resources/player2_dead.png",
 		player2Vertices);
+
+	// Variables to manage delayed transitions
+	bool player1ReadyInProgress = false;
+	bool player2ReadyInProgress = false;
+
+	bool player1DeathPending = false;
+	bool player2DeathPending = false;
+
+	auto player1ReadyTime = std::chrono::steady_clock::time_point::min();
+	auto player2ReadyTime = std::chrono::steady_clock::time_point::min();
+
+	auto player1DeathTime = std::chrono::steady_clock::time_point::min();
+	auto player2DeathTime = std::chrono::steady_clock::time_point::min();
+
+	bool inputDisabled = false; // Disable input after a player shoots
+
 	while (!glfwWindowShouldClose(window)) {
 		auto frameStart = std::chrono::high_resolution_clock::now();
-
-		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(frameStart.time_since_epoch());
-		std::cout << "Frame Start Time: " << duration.count() << " ms" << std::endl;
-
 
 		glClear(GL_COLOR_BUFFER_BIT);
 		glfwPollEvents();
 
-		// Check if 'A' key is pressed
-		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS && player1.getState() != Player::State::Dead) {
-			player1.setState(Player::State::Ready); // Set player1's state to READY when 'A' is pressed
-		}
-		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS && player1.getState() != Player::State::Dead) {
-			if (player1.getState() == Player::State::Ready)
-			{
-				player2.setState(Player::State::Dead); // Set player2's state to DEAD when 'S' is pressed
+		background.render();
+
+		if (!inputDisabled) {
+			if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS && player1.getState() == Player::State::Idle && !player1ReadyInProgress) {
+				player1ReadyTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(125);
+				player1ReadyInProgress = true;
 			}
-		}
-		if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS && player2.getState() != Player::State::Dead) {
-			player2.setState(Player::State::Ready); // Set player2's state to READY when 'K' is pressed
-		}
-		if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS && player2.getState() != Player::State::Dead) {
-			if (player2.getState() == Player::State::Ready)
-			{
-				player1.setState(Player::State::Dead); // Set player1's state to DEAD when 'L' is pressed
+			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS && player1.getState() == Player::State::Ready && player2.getState() != Player::State::Dead && !player2DeathPending) {
+				player2DeathTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(350);
+				player2DeathPending = true;
+				player1.addPoints();
+				inputDisabled = true;
+				std::cout << "player1 points: " << player1.getPoints() << "\tplayer2 points: " << player2.getPoints() << std::endl;
+			}
+
+			if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS && player2.getState() == Player::State::Idle && !player2ReadyInProgress) {
+				player2ReadyTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(125);
+				player2ReadyInProgress = true;
+			}
+			if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS && player2.getState() == Player::State::Ready && player1.getState() != Player::State::Dead && !player1DeathPending) {
+				player1DeathTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(350);
+				player1DeathPending = true;
+				player2.addPoints();
+				inputDisabled = true;
+				std::cout << "player1 points: " << player1.getPoints() << "\tplayer2 points: " << player2.getPoints() << std::endl;
 			}
 		}
 
-		background.render();
+		if (player1ReadyInProgress && std::chrono::steady_clock::now() >= player1ReadyTime) {
+			player1.setState(Player::State::Ready);
+			player1ReadyInProgress = false;
+		}
+
+		if (player2ReadyInProgress && std::chrono::steady_clock::now() >= player2ReadyTime) {
+			player2.setState(Player::State::Ready);
+			player2ReadyInProgress = false;
+		}
+
+		if (player2DeathPending && std::chrono::steady_clock::now() >= player2DeathTime) {
+			player2.setState(Player::State::Dead);
+			player2DeathPending = false;
+			inputDisabled = false;
+		}
+
+		if (player1DeathPending && std::chrono::steady_clock::now() >= player1DeathTime) {
+			player1.setState(Player::State::Dead);
+			player1DeathPending = false;
+			inputDisabled = false;
+		}
 
 		player1.render();
 		player2.render();
+
 		glfwSwapBuffers(window);
 		auto frameEnd = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<float> frameDuration = frameEnd - frameStart;

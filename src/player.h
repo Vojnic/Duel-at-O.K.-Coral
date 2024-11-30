@@ -15,6 +15,8 @@ public:
     ~Player();
 
     void setState(State newState);
+    void addPoints();
+	int getPoints();
     Player::State getState();
     void render();
 
@@ -25,6 +27,7 @@ private:
     GLuint textureIdleID, textureReadyID, textureDeadID;  // Separate texture IDs for each state
     GLuint shaderProgram;
     State currentState;
+    int points;
     GLfloat* playerVertices;  // Pointer to vertices for position customization
 };
 

@@ -10,6 +10,7 @@ Player::Player(const std::string& idleTexturePath,
 {
     // Initialize player state to Idle
     currentState = State::Idle;
+	points = 0;
     playerVertices = initialVertices;  // Store the passed-in vertices
 
     // Load textures for all 3 states
@@ -114,9 +115,18 @@ void Player::loadTexture(const std::string& texturePath, GLuint& textureID) {
 void Player::setState(State newState) {
     currentState = newState;
 }
+void Player::addPoints()
+{
+	points++;
+}
+int Player::getPoints()
+{
+    return points;
+}
 Player::State Player::getState() {
     return currentState;
 }
+
 
 // Render the player with the correct texture based on the current state
 void Player::render() {
