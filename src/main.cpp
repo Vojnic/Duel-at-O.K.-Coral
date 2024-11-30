@@ -3,19 +3,33 @@
 #include <GLFW/glfw3.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include <SFML/Audio.hpp>
 #include <iostream>
 #include "player.h"
 #include <chrono>
 #include <thread>
+#include "muzzleflash.h"
 
 
 #define FRAME_DURATION 0.00833333333333f
-int main() {
 
+sf::SoundBuffer shootBuffer;
+sf::Sound shootSound;
+
+
+int main() {
 	if (!glfwInit()) {
 		std::cerr << "Failed to initialize GLFW!" << std::endl;
 		return -1;
 	}
+
+	if (!shootBuffer.loadFromFile("Resources/shoot.mp3")) {
+		std::cerr << "Failed to load shoot sound!" << std::endl;
+		return -1;
+	}
+
+	shootSound.setBuffer(shootBuffer);
+	shootSound.setVolume(50.f);
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -54,30 +68,52 @@ int main() {
 		player1Vertices);
 
 	GLfloat player2Vertices[] = {
-		0.1f, -0.1f, 0.0f, 0.0f, 0.0f,  // Top-left 
-		0.1f, -1.f, 0.0f, 0.0f, 1.0f,  // Bottom-left
-		1.f, -1.f, 0.0f, 1.0f, 1.0f,  // Bottom-right
-		1.f, -0.1f, 0.0f, 1.0f, 0.0f   // Top-right 
+		0.1f, -0.1f, 0.0f, 0.0f, 0.0f,
+		0.1f, -1.f, 0.0f, 0.0f, 1.0f,
+		1.f, -1.f, 0.0f, 1.0f, 1.0f,
+		1.f, -0.1f, 0.0f, 1.0f, 0.0f
 	};
 	Player player2("Resources/player2_idle.png",
 		"Resources/player2_ready.png",
 		"Resources/player2_dead.png",
 		player2Vertices);
 
-	// Variables to manage delayed transitions
+	GLfloat player1MuzzleVertices[] = {
+	-0.32f, -0.4f, 0.0f, 0.0f, 0.0f,
+	-0.32f, -0.3f, 0.0f, 0.0f, 1.0f,
+	-0.12f, -0.3f, 0.0f, 1.0f, 1.0f,
+	-0.12f, -0.4f, 0.0f, 1.0f, 0.0f
+	};
+	MuzzleFlash player1Muzzle(player1MuzzleVertices);
+
+	GLfloat player2MuzzleVertices[] = {
+	0.32f, -0.4f, 0.0f, 0.0f, 0.0f,
+	0.32f, -0.3f, 0.0f, 0.0f, 1.0f,
+	0.12f, -0.3f, 0.0f, 1.0f, 1.0f,
+	0.12f, -0.4f, 0.0f, 1.0f, 0.0f
+	};
+	MuzzleFlash player2Muzzle(player2MuzzleVertices);
+
 	bool player1ReadyInProgress = false;
-	bool player2ReadyInProgress = false;
-
-	bool player1DeathPending = false;
-	bool player2DeathPending = false;
-
 	auto player1ReadyTime = std::chrono::steady_clock::time_point::min();
+
+	bool player2ReadyInProgress = false;
 	auto player2ReadyTime = std::chrono::steady_clock::time_point::min();
 
+	bool player1DeathPending = false;
 	auto player1DeathTime = std::chrono::steady_clock::time_point::min();
+
+	bool player2DeathPending = false;
 	auto player2DeathTime = std::chrono::steady_clock::time_point::min();
 
-	bool inputDisabled = false; // Disable input after a player shoots
+	bool player1MuzzleVisible = false;
+	auto player1MuzzleTime = std::chrono::steady_clock::time_point::min();
+
+	bool player2MuzzleVisible = false;
+	auto player2MuzzleTime = std::chrono::steady_clock::time_point::min();
+
+	const std::chrono::milliseconds MUZZLE_FLASH_DURATION(150);
+	bool inputDisabled = false;
 
 	while (!glfwWindowShouldClose(window)) {
 		auto frameStart = std::chrono::high_resolution_clock::now();
@@ -86,6 +122,20 @@ int main() {
 		glfwPollEvents();
 
 		background.render();
+
+		if (std::chrono::steady_clock::now() < player1MuzzleTime + MUZZLE_FLASH_DURATION) {
+			player1Muzzle.setShow(true);
+		}
+		else {
+			player1Muzzle.setShow(false);
+		}
+
+		if (std::chrono::steady_clock::now() < player2MuzzleTime + MUZZLE_FLASH_DURATION) {
+			player2Muzzle.setShow(true);
+		}
+		else {
+			player2Muzzle.setShow(false);
+		}
 
 		if (!inputDisabled) {
 			if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS && player1.getState() == Player::State::Idle && !player1ReadyInProgress) {
@@ -97,6 +147,10 @@ int main() {
 				player2DeathPending = true;
 				player1.addPoints();
 				inputDisabled = true;
+				shootSound.play();
+
+				player1MuzzleTime = std::chrono::steady_clock::now();
+
 				std::cout << "player1 points: " << player1.getPoints() << "\tplayer2 points: " << player2.getPoints() << std::endl;
 			}
 
@@ -109,6 +163,9 @@ int main() {
 				player1DeathPending = true;
 				player2.addPoints();
 				inputDisabled = true;
+				shootSound.play();
+
+				player2MuzzleTime = std::chrono::steady_clock::now();
 				std::cout << "player1 points: " << player1.getPoints() << "\tplayer2 points: " << player2.getPoints() << std::endl;
 			}
 		}
@@ -136,7 +193,9 @@ int main() {
 		}
 
 		player1.render();
+		player1Muzzle.render();
 		player2.render();
+		player2Muzzle.render();
 
 		glfwSwapBuffers(window);
 		auto frameEnd = std::chrono::high_resolution_clock::now();
