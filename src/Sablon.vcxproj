@@ -156,6 +156,7 @@ sfml-system.lib
     <ClCompile Include="MuzzleFlash.cpp" />
     <ClCompile Include="muzzleflash.h" />
     <ClCompile Include="player.cpp" />
+    <ClCompile Include="soundindicator.cpp" />
     <ClCompile Include="TextRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -174,16 +175,21 @@ sfml-system.lib
     <Image Include="Resources\player2_dead.png" />
     <Image Include="Resources\player2_idle.png" />
     <Image Include="Resources\player2_ready.png" />
+    <Image Include="Resources\quit_button.png" />
+    <Image Include="Resources\retry_button.png" />
     <Image Include="Resources\singleplayer.png" />
     <Image Include="Resources\wildwestbackground.jpg" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="background.h" />
     <ClInclude Include="player.h" />
+    <ClInclude Include="soundindicator.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="TextRenderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <Media Include="Resources\fake_indicator.wav" />
+    <Media Include="Resources\real_indicator.wav" />
     <Media Include="Resources\shoot.mp3" />
   </ItemGroup>
   <ItemGroup>

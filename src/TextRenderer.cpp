@@ -9,18 +9,12 @@
 #include <glm/gtc/type_ptr.hpp>
 TextRenderer::TextRenderer(const std::string& fontPath, const std::string& vertexShaderPath, const std::string& fragmentShaderPath, int fontSize) {
 
-    // Kreiraj šejder program
     shaderProgram = createShader(vertexShaderPath, fragmentShaderPath);
 
-
-
-    // U?itaj karaktere iz fonta
     loadCharacters(fontPath, fontSize);
 
-    // Kreiraj VAO i VBO za renderovanje teksta
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-    std::cout << "VAO: " << VAO << ", VBO: " << VBO << std::endl;
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, nullptr, GL_DYNAMIC_DRAW);
