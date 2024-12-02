@@ -44,6 +44,10 @@ SoundIndicator::~SoundIndicator() {
 }
 
 void SoundIndicator::playRandomIndicator(bool& inputDisabled) {
+    if (sound.getStatus() == sf::Sound::Playing) {
+        sound.stop(); // Stop the sound if it's playing before playing a new one
+    }
+
     lastPlayedReal = dist(rng) < 0.5; // 50% chance
 
     if (lastPlayedReal) {

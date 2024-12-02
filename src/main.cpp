@@ -220,7 +220,7 @@ int main() {
 		}
 		if (!entryScreenActive) {
 			if (!waitingForSound && player1.getState() == Player::State::Idle && player2.getState() == Player::State::Idle &&
-				std::chrono::steady_clock::now() >= soundTriggerTime) {
+				std::chrono::steady_clock::now() >= soundTriggerTime && !soundIndicator.wasLastIndicatorReal()) {
 				waitingForSound = true;
 				soundIndicator.playRandomIndicator(inputDisabled);
 				soundTriggerTime = std::chrono::steady_clock::now() + std::chrono::seconds(2 + rand() % 2);
