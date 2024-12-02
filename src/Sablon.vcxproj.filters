@@ -54,8 +54,12 @@
     <None Include="basic.vert">
       <Filter>Source Files\Shader Files</Filter>
     </None>
-    <None Include="text.frag" />
-    <None Include="text.vert" />
+    <None Include="text.frag">
+      <Filter>Source Files\Shader Files</Filter>
+    </None>
+    <None Include="text.vert">
+      <Filter>Source Files\Shader Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\wildwestbackground.jpg">
@@ -111,17 +115,24 @@
     <ClInclude Include="soundindicator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Media Include="Resources\shoot.mp3" />
     <Media Include="Resources\fake_indicator.wav">
       <Filter>Resource Files</Filter>
     </Media>
     <Media Include="Resources\real_indicator.wav">
       <Filter>Resource Files</Filter>
     </Media>
+    <Media Include="Resources\shoot.mp3">
+      <Filter>Resource Files</Filter>
+    </Media>
   </ItemGroup>
   <ItemGroup>
-    <Font Include="Resources\Roboto-Medium.ttf" />
+    <Font Include="Resources\Roboto-Medium.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
   </ItemGroup>
 </Project>

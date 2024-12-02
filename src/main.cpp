@@ -14,13 +14,32 @@
 #include <chrono>
 #include <thread>
 #include <random>
+#include "main.h"
 
 #define FRAME_DURATION 0.00833333333333f
 
 sf::SoundBuffer shootBuffer;
 sf::Sound shootSound;
+std::chrono::steady_clock::time_point bot2ShootTime;
 
+bool botIsReady = false;
+void botShoot(Player& player1, Player& player2, bool& inputDisabled, sf::Sound& shootSound) {
+	if (player2.getState() == Player::State::Idle) {
+		player2.setState(Player::State::Ready);
+		bot2ShootTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(500 + rand() % 1000);
+		botIsReady = true;
+		std::cout << "Bot is ready" << std::endl;
 
+	}
+	if(botIsReady && std::chrono::steady_clock::now() >= bot2ShootTime){
+		player1.setState(Player::State::Dead);
+		player2.addPoints();
+		botIsReady = false;
+		inputDisabled = true;
+		shootSound.play();
+		std::cout << "player1 points: " << player1.getPoints() << "\tplayer2 points: " << player2.getPoints() << std::endl;
+	}
+}
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
@@ -172,6 +191,8 @@ int main() {
 		float x = (2.0f * xpos) / width - 1.0f;
 		float y = 1.0f - (2.0f * ypos) / height;
 
+
+
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
 			if (entryScreenActive) {
 
@@ -187,12 +208,12 @@ int main() {
 					entryScreenActive = false;
 				}
 			}
-			if (player1.getState() == Player::State::Dead || player2.getState() == Player::State::Dead) {
-				if (retryButton.isClicked(x, y)) {
-					player1.setState(Player::State::Idle);
-					player2.setState(Player::State::Idle);
-				}
-				else if (quitButton.isClicked(x, y)) {
+			else if (player1.getState() == Player::State::Dead || player2.getState() == Player::State::Dead) {
+					if (retryButton.isClicked(x, y)) {
+						player1.setState(Player::State::Idle);
+						player2.setState(Player::State::Idle);
+					}
+					else if (quitButton.isClicked(x, y)) {
 					glfwSetWindowShouldClose(window, true);
 				}
 			}
@@ -207,7 +228,6 @@ int main() {
 			else if (waitingForSound && soundIndicator.isSoundFinished()) {
 				waitingForSound = false;
 			}
-
 			if ((player1.getState() == Player::State::Dead || player2.getState() == Player::State::Dead) && !waitingForSound) {
 				if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
 					if (retryButton.isClicked(x, y)) {
@@ -217,6 +237,7 @@ int main() {
 						player2ReadyInProgress = false;
 						inputDisabled = true;
 						waitingForSound = false;
+						botIsReady = false;
 						soundTriggerTime = std::chrono::steady_clock::now() + std::chrono::seconds(2 + rand() % 2);
 					}
 					else if (quitButton.isClicked(x, y)) {
@@ -241,12 +262,15 @@ int main() {
 
 				std::cout << "player1 points: " << player1.getPoints() << "\tplayer2 points: " << player2.getPoints() << std::endl;
 			}
-
-			if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS && player2.getState() == Player::State::Idle && !player2ReadyInProgress) {
+			if (isSinglePlayer) {
+				botShoot(player1, player2, inputDisabled, shootSound);
+				player2MuzzleTime = std::chrono::steady_clock::now();
+			}
+			if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS && player2.getState() == Player::State::Idle && !player2ReadyInProgress && !isSinglePlayer) {
 				player2ReadyTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(125);
 				player2ReadyInProgress = true;
 			}
-			if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS && player2.getState() == Player::State::Ready && player1.getState() != Player::State::Dead && !player1DeathPending) {
+			if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS && player2.getState() == Player::State::Ready && player1.getState() != Player::State::Dead && !player1DeathPending && !isSinglePlayer) {
 				player1DeathTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(350);
 				player1DeathPending = true;
 				player2.addPoints();
