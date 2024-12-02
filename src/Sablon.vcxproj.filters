@@ -18,13 +18,31 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="background.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="button.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="button.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MuzzleFlash.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="muzzleflash.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TextRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="soundindicator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -34,6 +52,12 @@
       <Filter>Source Files\Shader Files</Filter>
     </None>
     <None Include="basic.vert">
+      <Filter>Source Files\Shader Files</Filter>
+    </None>
+    <None Include="text.frag">
+      <Filter>Source Files\Shader Files</Filter>
+    </None>
+    <None Include="text.vert">
       <Filter>Source Files\Shader Files</Filter>
     </None>
   </ItemGroup>
@@ -59,6 +83,21 @@
     <Image Include="Resources\player1_ready.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="Resources\multiplayer.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\muzzleflash.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\singleplayer.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\quit_button.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\retry_button.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="background.h">
@@ -70,5 +109,30 @@
     <ClInclude Include="stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TextRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="soundindicator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="Resources\fake_indicator.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="Resources\real_indicator.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="Resources\shoot.mp3">
+      <Filter>Resource Files</Filter>
+    </Media>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="Resources\Roboto-Medium.ttf">
+      <Filter>Resource Files</Filter>
+    </Font>
   </ItemGroup>
 </Project>
