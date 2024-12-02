@@ -22,21 +22,22 @@ sf::Sound shootSound;
 std::chrono::steady_clock::time_point bot2ShootTime;
 
 bool botIsReady = false;
-void botShoot(Player& player1, Player& player2, bool& inputDisabled, sf::Sound& shootSound) {
+bool botShoot(Player& player1, Player& player2, bool& inputDisabled, sf::Sound& shootSound) {
 	if (player2.getState() == Player::State::Idle) {
 		player2.setState(Player::State::Ready);
 		bot2ShootTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(500 + rand() % 1000);
 		botIsReady = true;
 		std::cout << "Bot is ready" << std::endl;
-
+		return false;
 	}
-	if(botIsReady && std::chrono::steady_clock::now() >= bot2ShootTime){
+	if (botIsReady && std::chrono::steady_clock::now() >= bot2ShootTime) {
 		player1.setState(Player::State::Dead);
 		player2.addPoints();
 		botIsReady = false;
 		inputDisabled = true;
 		shootSound.play();
 		std::cout << "player1 points: " << player1.getPoints() << "\tplayer2 points: " << player2.getPoints() << std::endl;
+		return true;
 	}
 }
 
@@ -215,12 +216,12 @@ int main() {
 				}
 			}
 			else if (player1.getState() == Player::State::Dead || player2.getState() == Player::State::Dead) {
-					if (retryButton.isClicked(x, y)) {
-						player1.setState(Player::State::Idle);
-						player2.setState(Player::State::Idle);
-						soundIndicator.setLastIndicatorReal(false);
-					}
-					else if (quitButton.isClicked(x, y)) {
+				if (retryButton.isClicked(x, y)) {
+					player1.setState(Player::State::Idle);
+					player2.setState(Player::State::Idle);
+					soundIndicator.setLastIndicatorReal(false);
+				}
+				else if (quitButton.isClicked(x, y)) {
 					glfwSetWindowShouldClose(window, true);
 				}
 			}
@@ -274,15 +275,16 @@ int main() {
 				player1MuzzleTime = std::chrono::steady_clock::now();
 
 				std::cout << "player1 points: " << player1.getPoints() << "\tplayer2 points: " << player2.getPoints() << std::endl;
-				
+
 				endTime = std::chrono::steady_clock::now();
 				std::chrono::duration<float> timeDifference = endTime - startTime;
 				auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(timeDifference);
 				std::cout << "Time difference: " << duration.count() << "ms" << std::endl;
 			}
 			if (isSinglePlayer) {
-				botShoot(player1, player2, inputDisabled, shootSound);
-				player2MuzzleTime = std::chrono::steady_clock::now();
+				if (botShoot(player1, player2, inputDisabled, shootSound)) {
+					player2MuzzleTime = std::chrono::steady_clock::now();
+				}
 				endTime = std::chrono::steady_clock::now();
 				std::chrono::duration<float> timeDifference = endTime - startTime;
 				auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(timeDifference);
