@@ -7,11 +7,11 @@ class SoundIndicator {
 public:
     SoundIndicator(const std::string& fakeIndicatorPath, const std::string& realIndicatorPath);
     ~SoundIndicator();
-    
-    void playRandomIndicator(bool& inputDisabled);
-	bool playRandomSoundWithDelay();
+
+    bool playRandomIndicator(bool& inputDisabled);
     bool wasLastIndicatorReal() const;
-	bool isSoundFinished() const;
+    void setLastIndicatorReal(bool real);
+    bool isSoundFinished() const;
     void stop();
 
 private:
@@ -19,7 +19,6 @@ private:
     sf::SoundBuffer realBuffer;
     sf::Sound sound;
     bool lastPlayedReal;
-	bool soundFinished;
     std::mt19937 rng;
     std::uniform_real_distribution<double> dist;
 };

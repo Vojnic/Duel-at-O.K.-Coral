@@ -1,4 +1,4 @@
-#include "Button.h"
+#include "button.h"
 #include <iostream>
 #include "stb_image.h"
 

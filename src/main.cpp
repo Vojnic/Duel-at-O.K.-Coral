@@ -14,7 +14,6 @@
 #include <chrono>
 #include <thread>
 #include <random>
-#include "main.h"
 
 #define FRAME_DURATION 0.00833333333333f
 
@@ -164,12 +163,19 @@ int main() {
 	bool waitingForSound = false;
 	auto soundTriggerTime = std::chrono::steady_clock::now() + std::chrono::seconds(3);
 
+
+	bool arePlayersReady = false;
+	auto startTime = std::chrono::steady_clock::now();
+	auto endTime = std::chrono::steady_clock::now();
+
 	while (!glfwWindowShouldClose(window)) {
 		auto frameStart = std::chrono::high_resolution_clock::now();
 		glClear(GL_COLOR_BUFFER_BIT);
 		glfwPollEvents();
 
-
+		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+			glfwSetWindowShouldClose(window, true);
+		}
 		if (std::chrono::steady_clock::now() < player1MuzzleTime + MUZZLE_FLASH_DURATION) {
 			player1Muzzle.setShow(true);
 		}
@@ -212,6 +218,7 @@ int main() {
 					if (retryButton.isClicked(x, y)) {
 						player1.setState(Player::State::Idle);
 						player2.setState(Player::State::Idle);
+						soundIndicator.setLastIndicatorReal(false);
 					}
 					else if (quitButton.isClicked(x, y)) {
 					glfwSetWindowShouldClose(window, true);
@@ -222,7 +229,10 @@ int main() {
 			if (!waitingForSound && player1.getState() == Player::State::Idle && player2.getState() == Player::State::Idle &&
 				std::chrono::steady_clock::now() >= soundTriggerTime && !soundIndicator.wasLastIndicatorReal()) {
 				waitingForSound = true;
-				soundIndicator.playRandomIndicator(inputDisabled);
+				arePlayersReady = soundIndicator.playRandomIndicator(inputDisabled);
+				if (arePlayersReady) {
+					startTime = std::chrono::steady_clock::now();
+				}
 				soundTriggerTime = std::chrono::steady_clock::now() + std::chrono::seconds(2 + rand() % 2);
 			}
 			else if (waitingForSound && soundIndicator.isSoundFinished()) {
@@ -237,8 +247,11 @@ int main() {
 						player2ReadyInProgress = false;
 						inputDisabled = true;
 						waitingForSound = false;
+						arePlayersReady = false;
+						soundIndicator.setLastIndicatorReal(false);
 						botIsReady = false;
-						soundTriggerTime = std::chrono::steady_clock::now() + std::chrono::seconds(2 + rand() % 2);
+
+						soundTriggerTime = std::chrono::steady_clock::now() + std::chrono::seconds(3);
 					}
 					else if (quitButton.isClicked(x, y)) {
 						glfwSetWindowShouldClose(window, true);
@@ -261,10 +274,18 @@ int main() {
 				player1MuzzleTime = std::chrono::steady_clock::now();
 
 				std::cout << "player1 points: " << player1.getPoints() << "\tplayer2 points: " << player2.getPoints() << std::endl;
+				
+				endTime = std::chrono::steady_clock::now();
+				std::chrono::duration<float> timeDifference = endTime - startTime;
+				auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(timeDifference);
+				std::cout << "Time difference: " << duration.count() << "ms" << std::endl;
 			}
 			if (isSinglePlayer) {
 				botShoot(player1, player2, inputDisabled, shootSound);
 				player2MuzzleTime = std::chrono::steady_clock::now();
+				endTime = std::chrono::steady_clock::now();
+				std::chrono::duration<float> timeDifference = endTime - startTime;
+				auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(timeDifference);
 			}
 			if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS && player2.getState() == Player::State::Idle && !player2ReadyInProgress && !isSinglePlayer) {
 				player2ReadyTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(125);
@@ -279,6 +300,11 @@ int main() {
 
 				player2MuzzleTime = std::chrono::steady_clock::now();
 				std::cout << "player1 points: " << player1.getPoints() << "\tplayer2 points: " << player2.getPoints() << std::endl;
+
+				endTime = std::chrono::steady_clock::now();
+				std::chrono::duration<float> timeDifference = endTime - startTime;
+				auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(timeDifference);
+				std::cout << "Time difference: " << duration.count() << "ms" << std::endl;
 			}
 		}
 
@@ -318,6 +344,27 @@ int main() {
 			if (player1.getState() == Player::State::Dead || player2.getState() == Player::State::Dead) {
 				retryButton.render();
 				quitButton.render();
+
+				std::chrono::duration<float> timeSinceGameStart = endTime - startTime;
+				auto timeMs = std::chrono::duration_cast<std::chrono::milliseconds>(timeSinceGameStart).count();
+				if (player1.getState() == Player::State::Dead) {
+					if (isSinglePlayer)
+					{
+						std::string timeString = "Bot shot in: " + std::to_string(timeMs) + "ms";
+						glm::vec3 timeColor(1.0f, 1.0f, 1.0f);
+						textRenderer.RenderText(timeString, 300.0f, 400.0f, 0.7f, timeColor);
+					}
+					else {
+						std::string timeString = "Player2 shot in: " + std::to_string(timeMs) + "ms";
+						glm::vec3 timeColor(1.0f, 1.0f, 1.0f);
+						textRenderer.RenderText(timeString, 300.0f, 400.0f, 0.7f, timeColor);
+					}
+				}
+				else {
+					std::string timeString = "Player1 shot in : " + std::to_string(timeMs) + "ms";
+					glm::vec3 timeColor(1.0f, 1.0f, 1.0f);
+					textRenderer.RenderText(timeString, 100.0f, 400.0f, 0.7f, timeColor);
+				}
 			}
 
 			glm::vec3 scoreColor(1.0f, 1.0f, 1.0f); // White color, adjust as needed

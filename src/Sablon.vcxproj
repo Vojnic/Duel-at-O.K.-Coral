@@ -182,7 +182,6 @@ sfml-system.lib
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="background.h" />
-    <ClInclude Include="main.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="soundindicator.h" />
     <ClInclude Include="stb_image.h" />

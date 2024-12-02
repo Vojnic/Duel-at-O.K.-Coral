@@ -14,8 +14,8 @@ public:
 
 private:
     GLuint VAO, VBO, textureID, shaderProgram;
-    bool showMuzzle;  // Flag to control visibility
-    GLfloat* muzzleVertices;  // Pointer to the muzzle flash vertices
+    bool showMuzzle;
+    GLfloat* muzzleVertices;
     void loadTexture(const std::string& texturePath, GLuint& textureID);
 };
 
